@@ -20,7 +20,8 @@
     const automaticLogin = true;
 
     const highlightCurrentStudium = true;
-    const currentStudium = "Bachelorstudium Software & Information Engineering"
+    const currentStudium = ["Bachelorstudium Software & Information Engineering",
+        "Example 2"]
 
     const completedLVANames = ["Einführung in die Programmierung 1",
         "Grundzüge digitaler Systeme",
@@ -70,16 +71,18 @@
         if (highlightCurrentStudium && currentUrl.includes("tiss.tuwien.ac.at/curriculum/studyCodes")) {
             const links = document.querySelectorAll('a');
 
-            for (const link of links) {
-                if (link.innerText.includes(currentStudium)) {
-                    // console.log(link.href.toString())
-                    // console.log(link.href.toString().substring(0, link.toString().indexOf("&key=")));
-                    const key = link.href.toString().substring(link.toString().indexOf("key="));
-                    link.href = "https://tiss.tuwien.ac.at/curriculum/public/curriculumSemester.xhtml?semesterCode=" + currentSemester + "&le=false&semester=YEAR&" + key;
-                    console.log("Found link:", link.href);
+            for (const Studium of currentStudium) {
+                for (const link of links) {
+                    if (link.innerText.includes(Studium)) {
+                        // console.log(link.href.toString())
+                        // console.log(link.href.toString().substring(0, link.toString().indexOf("&key=")));
+                        const key = link.href.toString().substring(link.toString().indexOf("key="));
+                        link.href = "https://tiss.tuwien.ac.at/curriculum/public/curriculumSemester.xhtml?semesterCode=" + currentSemester + "&le=false&semester=YEAR&" + key;
+                        console.log("Found link:", link.href);
 
-                    link.parentElement.style.backgroundColor = '#ceffc5';
-                    break;
+                        link.parentElement.style.backgroundColor = '#ceffc5';
+                        break;
+                    }
                 }
             }
         }
