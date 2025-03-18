@@ -1,29 +1,18 @@
-// ==UserScript==
-// @name         TISS QOL Upgrades
-// @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  Some qol improvements for TISS
-// @author       Chrisvenator
-// @match        *://tiss.tuwien.ac.at/*
-// @match        *://tuwel.tuwien.ac.at/login/index.php
-// @match        *idp.zid.tuwien.ac.at/*
-// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
-// @grant        none
-// @run-at       document-start
-// ==/UserScript==
-
-
 (function () {
     'use strict';
 
-    const currentSemester = "2023W";
+    const currentSemester = "2025S";
     const automaticLogin = true;
 
     const highlightCurrentStudium = true;
-    const currentStudium = ["Bachelorstudium Software & Information Engineering",
-        "Example 2"]
+    const currentStudium = [
+        "Bachelorstudium Software & Information Engineering",
+        "Bachelorstudium Informatik",
+        "Masterstudium Data Science"
+    ]
 
-    const completedLVANames = ["Einführung in die Programmierung 1",
+    const completedLVANames = [
+        "Einführung in die Programmierung 1",
         "Grundzüge digitaler Systeme",
         "Denkweisen der Informatik",
         "Orientierung Informatik und Wirtschaftsinformatik",
@@ -39,10 +28,25 @@
         "Propädeutikum für Informatik",
         "Softskills für TechnikerInnen",
         "Einführung in die Programmierung 1",
-        "",
-        "",
-        "",
-        "",
+        "Programmierparadigmen",
+        "Betriebssysteme",
+        "Computerstatistik",
+        "Generative AI",
+        "EDV-Vertragsrecht",
+        "Zwischen Karriere und Barriere",
+        "Logikprogrammierung und Constraints",
+        "Theoretische Informatik",
+        "Interface und Interaction Design",
+        "Web Engineering",
+        "Audio and Video Production",
+        "Daten- u. Informatikrecht, Übung",
+        "Einführung in Artificial Intelligence",
+        "Einführung in Security",
+        "Wissenschaftliches Arbeiten",
+        "Design und Fertigung",
+        "Software-Qualitätssicherung",
+        "Informationsvisualisierung",
+        "Bachelorarbeit für Informatik und Wirtschaftsinformatik",
         "",
         "",
         "",
@@ -95,7 +99,7 @@
             if (currentUrl.includes("tuwel.tuwien.ac.at/login/index.php")) {
                 window.location.href = "https://tuwel.tuwien.ac.at/auth/saml2/login.php";
             } else if (currentUrl.includes("idp.zid.tuwien.ac.at/simplesaml/module.php/core/loginuserpass.php")) {
-                console.log(document.getElementById("samlloginbutton"));
+                setTimeout(pressEnterKey, 500);
             } else if (currentUrl.includes("idp.zid.tuwien.ac.at/simplesaml/module.php/oldPW/confirmOldPW.php")) {
                 document.getElementById("yesbutton").click();
             } else if (currentUrl === "https://tiss.tuwien.ac.at/") {
@@ -103,10 +107,22 @@
             }
         }
     }); //event listener: load
-
 })
 
 ();
+
+function pressEnterKey() {
+    const enterKeyEvent = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        code: 'Enter',
+        which: 13,
+        keyCode: 13,
+        bubbles: true,
+    });
+
+    document.dispatchEvent(enterKeyEvent);
+    console.log("Pressed Enter Key")
+}
 
 function paintLVAs(completedLVANames, currentSemester) {
     const semesterContainer = Array.from(document.getElementsByClassName("standard big"));
