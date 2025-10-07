@@ -1,15 +1,15 @@
 (function () {
     'use strict';
 
-    const currentSemester = "2025S";
+    const currentSemester = "2025W";
     const automaticLogin = true;
 
     const highlightCurrentStudium = true;
-    const currentStudium = [
-        "Bachelorstudium Software & Information Engineering",
-        "Bachelorstudium Informatik",
-        "Masterstudium Data Science"
-    ]
+    const currentStudium = new Map([
+        ["Masterstudium Data Science", "https://tiss.tuwien.ac.at/curriculum/public/curriculum.xhtml?key=67853"],
+        ["Bachelorstudium Informatik", "https://tiss.tuwien.ac.at/curriculum/public/curriculum.xhtml?key=71647"],
+        ["Bachelorstudium Software & Information Engineering", "https://tiss.tuwien.ac.at/curriculum/public/curriculum.xhtml?key=46100"]
+    ]);
 
     const completedLVANames = [
         "Einführung in die Programmierung 1",
@@ -68,29 +68,31 @@
     window.addEventListener("load", function () {
         const currentUrl = window.location.href;
 
-
-        if (currentUrl.includes("curriculumSemester")) {
-            paintLVAs(completedLVANames, currentSemester);
-            document.getElementById("j_id_2r:semesterSelect").addEventListener("change", function () {
-                setTimeout(function () {
-                    paintLVAs(completedLVANames, currentSemester)
-                }, 2000);
-            }); //event listener: change
+        // Add Studium links on favorites page
+        if (currentUrl.includes("tiss.tuwien.ac.at/education/favorites")) {
+            addStudiumLinks();
         }
 
+        // Paint completed LVAs in curriculum view
+        if (currentUrl.includes("curriculumSemester")) {
+            paintLVAs(completedLVANames, currentSemester);
+            const semesterSelect = document.getElementById("j_id_2r:semesterSelect");
+            if (semesterSelect) {
+                semesterSelect.addEventListener("change", function () {
+                    setTimeout(function () {
+                        paintLVAs(completedLVANames, currentSemester);
+                    }, 2000);
+                });
+            }
+        }
 
-        //////
-        //highlight current Studium
-        //////
-
+        // Highlight current Studium on study codes page
         if (highlightCurrentStudium && currentUrl.includes("tiss.tuwien.ac.at/curriculum/studyCodes")) {
             const links = document.querySelectorAll('a');
 
-            for (const Studium of currentStudium) {
+            for (const [studiumName, studiumUrl] of currentStudium) {
                 for (const link of links) {
-                    if (link.innerText.includes(Studium)) {
-                        // console.log(link.href.toString())
-                        // console.log(link.href.toString().substring(0, link.toString().indexOf("&key=")));
+                    if (link.innerText.includes(studiumName)) {
                         const key = link.href.toString().substring(link.toString().indexOf("key="));
                         link.href = "https://tiss.tuwien.ac.at/curriculum/public/curriculumSemester.xhtml?semesterCode=" + currentSemester + "&le=false&semester=YEAR&" + key;
                         console.log("Found link:", link.href);
@@ -102,86 +104,136 @@
             }
         }
 
-        //////
-        //Automatic login
-        //////
-
+        // Automatic login functionality
         if (automaticLogin) {
             if (currentUrl.includes("tuwel.tuwien.ac.at/login/index.php")) {
                 window.location.href = "https://tuwel.tuwien.ac.at/auth/saml2/login.php";
             } else if (currentUrl.includes("idp.zid.tuwien.ac.at/simplesaml/module.php/core/loginuserpass.php")) {
                 setTimeout(pressEnterKey, 500);
             } else if (currentUrl.includes("idp.zid.tuwien.ac.at/simplesaml/module.php/oldPW/confirmOldPW.php")) {
-                document.getElementById("yesbutton").click();
+                const yesButton = document.getElementById("yesbutton");
+                if (yesButton) yesButton.click();
             } else if (currentUrl === "https://tiss.tuwien.ac.at/") {
-                document.getElementsByClassName("toolLogin")[0].click();
+                const loginButton = document.getElementsByClassName("toolLogin")[0];
+                if (loginButton) loginButton.click();
             }
         }
-    }); //event listener: load
-})
-
-();
-
-function pressEnterKey() {
-    const enterKeyEvent = new KeyboardEvent('keydown', {
-        key: 'Enter',
-        code: 'Enter',
-        which: 13,
-        keyCode: 13,
-        bubbles: true,
     });
 
-    document.dispatchEvent(enterKeyEvent);
-    console.log("Pressed Enter Key")
-}
+    function addStudiumLinks() {
+        const searchForm = document.getElementById("searchForm");
+        if (!searchForm) return;
 
-function paintLVAs(completedLVANames, currentSemester) {
-    const semesterContainer = Array.from(document.getElementsByClassName("standard big"));
-    semesterContainer.forEach(function (semester) {
+        // Check if links already exist to avoid duplicates
+        if (document.getElementById("studium-links-container")) return;
 
-        const row = Array.from(semester.children[1].children);
-        row.forEach(function (element) {
-            // console.log(element)
-            // console.log(element.children[0])
-            // console.log(element.children[0].children[0])
-            // console.log(element.children[0].children[0].childNodes[0].hasChildNodes())
+        const linksContainer = document.createElement("div");
+        linksContainer.id = "studium-links-container";
+        linksContainer.style.marginTop = "15px";
+        linksContainer.style.marginBottom = "15px";
+        linksContainer.style.padding = "12px 15px";
+        linksContainer.style.backgroundColor = "#f5f5f5";
+        linksContainer.style.borderRadius = "5px";
+        linksContainer.style.border = "1px solid #ddd";
 
-            if (element.children[0].children[0].childNodes[0].hasChildNodes() &&
-                element.children[0].children[0].children[0].tagName === "SPAN") {
+        const title = document.createElement("strong");
+        title.textContent = "Meine Studiengänge: ";
+        title.style.marginRight = "10px";
+        title.style.color = "#333";
+        linksContainer.appendChild(title);
 
-                var lvaNumber = element.children[0].children[0].children[0].children[0].innerHTML + "";
-                var lvaName = element.children[0].children[0].children[0].children[1].innerText + "";
-
-                if (!lvaNumber.includes(currentSemester)) {
-                    console.log("pog")
-                    element.children[0].children[0].style.setProperty("color", "#ff0000", "important");
-                    element.children[0].children[0].style.setProperty("fontWeight", "bold", "important");
-                }
-                lvaNumber = lvaNumber.substring(0, lvaNumber.indexOf(" "));
-
-                if (completedLVANames.includes(lvaName)) {
-
-                    element.style.backgroundColor = "#F2FFF2"
-                    element.children[0].children[0].style.setProperty("background-color", "#f2fff2", "important");
-                }
-
-
-            } else {
-                let lvaName = element.children[0].children[0].innerText.toString()
-                    .replace("VO ", "")
-                    .replace("UE ", "")
-                    .replace("VU ", "")
-                    .trimEnd();
-
-                if (completedLVANames.includes(lvaName)) {
-                    element.style.backgroundColor = "#e2f1e2"
-                    element.children[0].children[0].style.setProperty("background-color", "#e2f1e2", "important");
-                } else {
-                    element.style.backgroundColor = "#eeeeee"
-                    element.children[0].children[0].style.setProperty("background-color", "#eeeeee", "important");
-                }
-
+        let isFirst = true;
+        for (const [studiumName, studiumUrl] of currentStudium) {
+            if (!isFirst) {
+                const separator = document.createElement("span");
+                separator.textContent = " | ";
+                separator.style.margin = "0 8px";
+                separator.style.color = "#999";
+                linksContainer.appendChild(separator);
             }
+
+            const link = document.createElement("a");
+            // Construct the full URL with current semester
+            link.href = studiumUrl + "&semesterCode=" + currentSemester + "&le=false&semester=YEAR";
+            link.textContent = studiumName;
+            link.style.color = "#005f9e";
+            link.style.textDecoration = "none";
+            link.style.fontWeight = "500";
+
+            link.addEventListener("mouseenter", function () {
+                this.style.textDecoration = "underline";
+                this.style.color = "#003d6b";
+            });
+            link.addEventListener("mouseleave", function () {
+                this.style.textDecoration = "none";
+                this.style.color = "#005f9e";
+            });
+
+            linksContainer.appendChild(link);
+            isFirst = false;
+        }
+
+        // Insert after the search form
+        searchForm.parentNode.insertBefore(linksContainer, searchForm.nextSibling);
+    }
+
+    function pressEnterKey() {
+        const enterKeyEvent = new KeyboardEvent('keydown', {
+            key: 'Enter',
+            code: 'Enter',
+            which: 13,
+            keyCode: 13,
+            bubbles: true,
         });
-    });
-}
+
+        document.dispatchEvent(enterKeyEvent);
+        console.log("Pressed Enter Key");
+    }
+
+    function paintLVAs(completedLVANames, currentSemester) {
+        const semesterContainer = Array.from(document.getElementsByClassName("standard big"));
+        semesterContainer.forEach(function (semester) {
+            const tbody = semester.querySelector('tbody');
+            if (!tbody) return;
+
+            const rows = Array.from(tbody.children);
+            rows.forEach(function (element) {
+                // Skip footer rows
+                if (element.classList.contains('ui-datatable-footer')) return;
+
+                const firstCell = element.children[0];
+                if (!firstCell) return;
+
+                const linkContainer = firstCell.querySelector('a');
+                if (!linkContainer) return;
+
+                // Get LVA information
+                const lvaTitle = linkContainer.textContent.trim();
+                const graySpan = firstCell.querySelector('.gray');
+
+                if (graySpan) {
+                    const spanChildren = graySpan.querySelectorAll('span');
+                    if (spanChildren.length >= 3) {
+                        const lvaNumber = spanChildren[0].textContent.trim();
+                        const lvaType = spanChildren[1].textContent.trim();
+                        const lvaSemester = spanChildren[2].textContent.trim();
+
+                        // Highlight if not from current semester
+                        if (!lvaSemester.includes(currentSemester)) {
+                            linkContainer.style.setProperty("color", "#ff0000", "important");
+                            linkContainer.style.setProperty("fontWeight", "bold", "important");
+                        }
+                    }
+                }
+
+                // Check if LVA is completed
+                if (completedLVANames.includes(lvaTitle)) {
+                    element.style.backgroundColor = "#F2FFF2";
+                    if (linkContainer.parentElement) {
+                        linkContainer.parentElement.style.setProperty("background-color", "#f2fff2", "important");
+                    }
+                }
+            });
+        });
+    }
+})();
