@@ -1,3 +1,4 @@
+
 (function () {
     'use strict';
 
@@ -6,9 +7,9 @@
 
     const highlightCurrentStudium = true;
     const currentStudium = new Map([
-        ["Masterstudium Data Science", "https://tiss.tuwien.ac.at/curriculum/public/curriculum.xhtml?key=67853"],
-        ["Bachelorstudium Informatik", "https://tiss.tuwien.ac.at/curriculum/public/curriculum.xhtml?key=71647"],
-        ["Bachelorstudium Software & Information Engineering", "https://tiss.tuwien.ac.at/curriculum/public/curriculum.xhtml?key=46100"]
+        ["Masterstudium Data Science", "https://tiss.tuwien.ac.at/curriculum/public/curriculumSemester.xhtml?dswid=4211&dsrid=587&le=false&semester=YEAR&semesterCode=" + currentSemester + "&key=67853"],
+        ["Bachelorstudium Informatik", "https://tiss.tuwien.ac.at/curriculum/public/curriculumSemester.xhtml?dswid=4211&dsrid=736&le=false&semester=YEAR&semesterCode=" + currentSemester + "&key=71647"],
+        ["Bachelorstudium Software & Information Engineering", "https://tiss.tuwien.ac.at/curriculum/public/curriculumSemester.xhtml?dswid=1115&dsrid=131&le=false&semester=YEAR&semesterCode=" + currentSemester + "&key=46100"]
     ]);
 
     const completedLVANames = [
@@ -113,6 +114,13 @@
             } else if (currentUrl.includes("idp.zid.tuwien.ac.at/simplesaml/module.php/oldPW/confirmOldPW.php")) {
                 const yesButton = document.getElementById("yesbutton");
                 if (yesButton) yesButton.click();
+            } else if (currentUrl.includes("idp.zid.tuwien.ac.at/simplesaml/module.php/tupwquality/badquality")) {
+                // Safety Note page - click Continue button
+                const continueButton = document.querySelector('button[type="submit"]');
+                if (continueButton && continueButton.textContent.includes("Continue")) {
+                    console.log("Safety Note detected - clicking Continue button");
+                    setTimeout(() => continueButton.click(), 500);
+                }
             } else if (currentUrl === "https://tiss.tuwien.ac.at/") {
                 const loginButton = document.getElementsByClassName("toolLogin")[0];
                 if (loginButton) loginButton.click();
